@@ -1,0 +1,12 @@
+version: v1
+plugins:
+  - plugin: go
+    out: ./go
+  - plugin: go-grpc
+    out: ./go
+  - plugin: python
+    out: ./python
+    opt: paths=source_relative
+  - plugin: grpc_python
+    out: ./python
+    opt: paths=source_relative
