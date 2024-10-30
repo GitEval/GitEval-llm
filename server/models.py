@@ -38,3 +38,15 @@ class EvaluationRequest(BaseModel):
 
 class EvaluationResponse(BaseModel):
     evaluation: str
+
+class AreaRequest(BaseModel):
+    bio: str  # 个人简介
+    company:str
+    location:str
+    follower_areas: List[str] # 粉丝的地区
+    following_areas: List[str] # 追随者的地区
+
+
+class AreaResponse(BaseModel):
+    area: str
+    Confidence:float

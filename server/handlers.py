@@ -19,3 +19,8 @@ async def get_domain(req: models.DomainRequest, service: service.Service = Depen
 async def get_evaluation(req: models.EvaluationRequest, service: service.Service = Depends(get_service)):
     # 创建响应结构体
     return service.get_evaluation(req)
+
+@router.post("/getArea", response_model=models.AreaResponse)
+async def get_area(req: models.AreaRequest, service: service.Service = Depends(get_service)):
+    # 创建响应结构体
+    return service.get_area(req)

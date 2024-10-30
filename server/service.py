@@ -51,6 +51,20 @@ repo_template = """
 根据以上仓库信息，请给出该用户的综合评价，内容包括但不限于技术能力、活跃度和对开源社区的贡献，并按照星级打分(0到5颗星)。限制评价长度最多为100字。
 """
 
+area_template = """
+请根据以下用户的 GitHub 信息对其可能的地区进行推测。
+
+个人简介: {bio}
+公司信息: {company}
+自述地区: {location}
+粉丝的自述地区分布: {followers}
+关注的用户的自述地区分布: {following}
+
+请根据以上信息推测该用户最可能所在的国家或地区(使用中文表示)，并提供一个置信度分数（0到1，1表示非常确定，0表示无法确定）。如果信息不足以做出明确推测，请将地区置为"N/A"
+
+返回格式如下：
+{"country": "<推测的国家或地区>", "confidence": <置信度>}
+"""
 
 
 # 创建 PromptTemplate 和 LLMChain
@@ -80,6 +94,10 @@ repo_prompt = PromptTemplate(
     template=repo_template
 )
 
+area_prompt = PromptTemplate(
+    input_variables=["bio","location","company","follower","following"],
+    template=area_template
+)
 
 class Service:
     def __init__(self):
@@ -88,6 +106,7 @@ class Service:
         self.domainChain = LLMChain(prompt=domain_prompt, llm=llm)
         self.evaluationChain = LLMChain(prompt=evaluation_prompt, llm=llm)
         self.repo_summaryChain = LLMChain(prompt=repo_prompt, llm=llm)
+        self.areaChain = LLMChain(prompt=area_prompt, llm=llm)
 
     def _evaluate_repos(self, repos: List[models.Repo]) -> str:
         evaluations = []
@@ -153,3 +172,22 @@ class Service:
         })
 
         return models.EvaluationResponse(evaluation=final_evaluation)
+
+    def get_area(self, req: models.AreaRequest) -> models.AreaResponse:
+        # 运行 areaChain 并获取返回结果
+        result = self.areaChain.run({
+            "bio": req.bio,
+            "company": req.company,
+            "location": req.location,
+            "follower": req.follower,
+            "following": req.following,
+        })
+
+        # 解析返回的 JSON 格式结果
+        area_result = eval(result)  # 将字符串格式转换为字典
+
+        # 返回 AreaResponse 包含国家和置信度
+        return models.AreaResponse(
+            country=area_result["country"],
+            confidence=area_result["confidence"]
+        )
