@@ -28,28 +28,24 @@ domain_template = """
 """
 
 evaluation_template = """
-请根据用户的以下 GitHub 仓库评价信息以及其他个人信息进行最终评价：
-仓库以及对应评价:{repo_evaluations}
+请根据以下 GitHub 用户的信息进行综合评价：
+
+用户的各个仓库事件及其相关活动：
+{user_events}
+
 个人简介：{bio}
-技术领域{domain}
-follower数量：{followers}
-following数量：{following}
+技术领域：{domains}
+粉丝数量：{followers}
+关注数量：{following}
 私人仓库数量：{total_private_repos}
 公开仓库数量：{total_public_repos}
-建号时间：{created_at}
+GitHub 账号创建时间：{created_at}
 所属组织：{organizations}
-github硬盘使用量：{disk_usage}KB
-根据以上各仓库的评价信息，请给出该用户的综合评价，内容包括但不限于技术能力、活跃度和对开源社区的贡献，并按照星级打分(0到5颗星)。
+硬盘使用量：{disk_usage} KB
+
+根据以上信息，请给出该用户的综合评价，涵盖技术能力、活跃度、影响力以及对开源社区的贡献。请使用 0 到 5 星的星级评分。
 """
 
-repo_template = """
-请根据以下用户的 GitHub 仓库信息进行对其进行评价
-仓库名：{repo.name}，星标数：{repo.star}，fork数：{repo.fork}
-语言占比：{repo.language}，
-用户对该仓库commit数：{repo.commit}，
-该仓库README内容：{repo.readme}"
-根据以上仓库信息，请给出该用户的综合评价，内容包括但不限于技术能力、活跃度和对开源社区的贡献，并按照星级打分(0到5颗星)。限制评价长度最多为100字。
-"""
 
 area_template = """
 请根据以下用户的 GitHub 信息对其可能的地区进行推测。
@@ -75,7 +71,7 @@ domain_prompt = PromptTemplate(
 
 evaluation_prompt = PromptTemplate(
     input_variables=[
-        "repo_evaluations",
+        "user_events",
         "bio",
         "domain",
         "follower",
@@ -89,10 +85,7 @@ evaluation_prompt = PromptTemplate(
     template=evaluation_template
 )
 
-repo_prompt = PromptTemplate(
-    input_variables=["repo.name", "repo.language", "repo.commit", "repo.star", "repo.readme"],
-    template=repo_template
-)
+
 
 area_prompt = PromptTemplate(
     input_variables=["bio","location","company","follower","following"],
@@ -105,7 +98,6 @@ class Service:
         llm = ChatOpenAI(model=config.model, openai_api_key=config.api_key)
         self.domainChain = LLMChain(prompt=domain_prompt, llm=llm)
         self.evaluationChain = LLMChain(prompt=evaluation_prompt, llm=llm)
-        self.repo_summaryChain = LLMChain(prompt=repo_prompt, llm=llm)
         self.areaChain = LLMChain(prompt=area_prompt, llm=llm)
 
     def _evaluate_repos(self, repos: List[models.Repo]) -> str:
@@ -150,20 +142,15 @@ class Service:
         return models.DomainResponse(domain=top_areas)
 
     def get_evaluation(self, req: models.EvaluationRequest) -> models.EvaluationResponse:
-        evaluations = []
-        for repo in req.repos:
-            evaluation = self.repo_summaryChain.run({
-                "repo.name": repo.name,
-                "repo.language": repo.language,
-                "repo.readme": repo.readme,
-                "repo.star": repo.star,
-                "repo.commit": repo.commit,
-                "repo.fork": repo.fork,
-            })
-            evaluations.append(evaluation)
+        user_events = []
+        for event in req.user_events:
+            if len(user_events) == 100:#限制长度为100
+                break
+            else:
+                user_events.append(f'仓库描述:{event.repo.description},仓库star数{event.repo.stargazers_count},仓库fork数{event.repo.forks_count},仓库创建时间:{event.repo.created_at},仓库贡献者数量:{event.repo.subscribers_count},用户对仓库commit数量:{event.commit_count},用户对仓库提issue数量:{event.issues_count},用户对仓库提pr次数:{event.pull_request_count}')
         # 调用 LLMChain 进行综合评价
         final_evaluation = self.evaluationChain.run({
-            "repo_evaluations": evaluations,
+            "user_events": user_events,
             "bio": req.bio,
             "organizations": req.organizations,
             "total_private_repos": req.total_private_repos,

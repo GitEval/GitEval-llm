@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 class Repo(BaseModel):
@@ -22,6 +22,19 @@ class DomainRequest(BaseModel):
 class DomainResponse(BaseModel):
     domain: List[str]  # 响应消息内容
 
+class RepoInfo(BaseModel):
+    description: Optional[str]
+    stargazers_count: Optional[int]
+    forks_count: Optional[int]
+    created_at: Optional[str]
+    subscribers_count: Optional[int]
+
+class UserEvent(BaseModel):
+    repo: Optional[RepoInfo]  # 仓库信息
+    commit_count: int  # 提交计数
+    issues_count: int  # Issue 计数
+    pull_request_count: int  # Pull Request 计数
+
 
 class EvaluationRequest(BaseModel):
     bio: str  # 个人简介
@@ -29,7 +42,7 @@ class EvaluationRequest(BaseModel):
     following: int  # 关注
     total_private_repos: int  # 私人仓库数量
     total_public_repos: int  # 公开仓库数量
-    repos: List[Repo]  # 仓库列表
+    user_events: List[UserEvent]
     domains: List[str]  # 技术领域
     created_at: str  # 建号时间
     organizations: List[str]  # 所属组织
