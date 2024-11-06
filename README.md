@@ -1,5 +1,6 @@
 #GitEval项目大模型仓库
-本仓库项目主要基于langchain,调用gpt-4o作为基础模型
-主要提供两个接口：
+本仓库项目主要基于langchain和fastapi,调用gpt-4o作为基础模型
+主要提供三个接口：
 1. getDomain获取用户对应的领域列表,基于用户的仓库中的readme文件和用户的常用语言
 2. getEvaluation获取对用户的整体评价
+3. getNation基于用户关系网络推断用户国籍

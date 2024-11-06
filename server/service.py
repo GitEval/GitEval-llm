@@ -3,6 +3,8 @@ import json
 from collections import Counter, defaultdict
 from typing import List
 import re
+
+from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 
 import config.config as config
@@ -37,7 +39,6 @@ domain_template = """
 每次至多返回两个领域,确保输出为有效的 JSON 格式，不要包含其他文本说明。
 """
 
-
 evaluation_template = """
 请根据以下 GitHub 用户的信息为我提供综合评价：
 
@@ -60,7 +61,6 @@ evaluation_template = """
 根据以上信息，请给出对我的评价，包括以下部分：涵盖技术能力、活跃度、影响力、开源社区的贡献、综合评价。请使用 0 到 5 星的星级评分,并简单论述。
 请直接说评价，不需要讲述目的。
 """
-
 
 area_template = """
 请根据以下用户的 GitHub 信息对其可能的地区进行推测。
@@ -112,17 +112,17 @@ area_prompt = PromptTemplate(
 class Service:
     def __init__(self):
         # 创建 ChatOpenAI 模型
-        llm = ChatOpenAI(model=config.model, openai_api_key=config.api_key, base_url="https://api.chatanywhere.tech/v1")
-        self.domainChain = LLMChain(prompt=domain_prompt, llm=llm)
-        self.evaluationChain = LLMChain(prompt=evaluation_prompt, llm=llm)
-        self.areaChain = LLMChain(prompt=area_prompt, llm=llm)
+        llm = ChatOpenAI(model=config.model, openai_api_key=config.api_key, base_url=config.base_url)
+        self.domainChain = domain_prompt | llm | StrOutputParser()  # 组合成一个chain,langChain新版的抽象写法,我觉得很emmmm
+        self.evaluationChain = evaluation_prompt | llm | StrOutputParser()
+        self.areaChain = area_prompt | llm | StrOutputParser()
 
     async def fetch_domain_for_repo(self, repo: models.Repo) -> List[Domain]:
         # 截断 readme 内容，确保其长度在合理范围内
         truncated_readme = self.truncate_readme(repo.readme)
 
         # 调用 LLMChain 进行领域推理
-        result = self.domainChain.run({
+        result = self.domainChain.invoke({
             "repo_name": repo.name,
             "repo_language": repo.language,
             "readme": truncated_readme,
@@ -132,7 +132,7 @@ class Service:
         cleaned_result = result.replace('```json', '').replace('```', '').strip()
         # 尝试使用正则匹配返回的数组格式
         pattern = r'\[(.*?)\]'
-        match = re.search(pattern, cleaned_result,re.DOTALL)
+        match = re.search(pattern, cleaned_result, re.DOTALL)
         if match:
             # 提取匹配的部分并转换为列表
             area_list_str = match.group(0)  # 获取完整的数组字符串
@@ -202,31 +202,46 @@ class Service:
             return readme[:max_length] + '...'  # 截断并添加省略号
         return readme
 
-    def get_evaluation(self, req: models.GetEvaluationRequest) -> models.EvaluationResponse:
+    async def get_evaluation(self, req: models.GetEvaluationRequest) -> models.EvaluationResponse:
         user_events = []
-        for event in req.user_events:
-            if len(user_events) == 100:  # 限制长度为100
-                break
-            else:
-                user_events.append(
-                    f'仓库名称:{event.repo.name},仓库描述:{event.repo.description},仓库star数{event.repo.stargazers_count},仓库fork数{event.repo.forks_count},仓库创建时间:{event.repo.created_at},仓库贡献者数量:{event.repo.subscribers_count},用户对仓库commit数量:{event.commit_count},用户对仓库提issue数量:{event.issues_count},用户对仓库提pr次数:{event.pull_request_count}')
-        # 调用 LLMChain 进行综合评价
-        final_evaluation = self.evaluationChain.run({
-            "user_events": user_events,
-            "bio": req.bio,
-            "following": req.following,
-            "domains": req.domains,
-            "followers": req.followers,
-            "total_private_repos": req.total_private_repos,
-            "total_public_repos": req.total_public_repos,
-        })
+        try:
+            # 尝试拼接用户事件信息
+            for event in req.user_events:
+                if len(user_events) == 100:  # 限制长度为100
+                    break
+                else:
+                    user_events.append(
+                        f'仓库名称:{event.repo.name},仓库描述:{event.repo.description},仓库star数{event.repo.stargazers_count},'
+                        f'仓库fork数{event.repo.forks_count},仓库创建时间:{event.repo.created_at},'
+                        f'仓库贡献者数量:{event.repo.subscribers_count},用户对仓库commit数量:{event.commit_count},'
+                        f'用户对仓库提issue数量:{event.issues_count},用户对仓库提pr次数:{event.pull_request_count}')
+        except Exception as e:
+            # 如果拼接用户事件信息出错，则记录错误并返回默认值
+            print(f"拼接用户事件信息出错: {e}")
+            user_events = []  # 设置为默认空列表
+
+        try:
+            # 调用 LLMChain 进行综合评价
+            final_evaluation = self.evaluationChain.invoke({
+                "user_events": user_events,
+                "bio": req.bio,
+                "following": req.following,
+                "domains": req.domains,
+                "followers": req.followers,
+                "total_private_repos": req.total_private_repos,
+                "total_public_repos": req.total_public_repos,
+            })
+        except Exception as e:
+            # 如果调用 LLMChain 出错，则记录错误并返回默认值
+            print(f"调用 LLMChain 出错: {e}")
+            final_evaluation = "评价失败"  # 返回默认的错误信息
 
         return models.EvaluationResponse(evaluation=final_evaluation)
 
-    def get_area(self, req: models.AreaRequest) -> models.AreaResponse:
+    async def get_area(self, req: models.AreaRequest) -> models.AreaResponse:
         try:
             # 运行 areaChain 并获取返回结果
-            result = self.areaChain.run({
+            result = self.areaChain.invoke({
                 "bio": req.bio,
                 "company": req.company,
                 "location": req.location,

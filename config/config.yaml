@@ -1,2 +1,4 @@
 api_key: sk-NKTf9RUWNJGD8rfZSUJFyTA7HXgWmVYHsv1XpELb2zrg8gRg
 model: gpt-4o
+port: "[::]:11028"
+base_url: "https://api.chatanywhere.tech/v1"

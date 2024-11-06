@@ -16,8 +16,8 @@ COPY . /app/
 # 设置环境变量（可选，根据需要配置）
 ENV PYTHONUNBUFFERED=1
 
-# 暴露应用端口（如果有，依据你的应用需求）
-EXPOSE 5000
+# 暴露应用端口（依据你的应用需求）
+EXPOSE 11028
 
 # 启动应用（假设你的主程序是 main.py）
 CMD ["python", "main.py"]

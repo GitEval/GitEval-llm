@@ -1,2 +1,4 @@
+base_url: your_base_url #一般就用openai的,如果你有什么其他通道也可以使用别的
 api_key: your_api_key
-model: gpt-4o-mini
+model: gpt-4o
+port: [::]:11028 #程序员节捏,虽然一般rpc端口不会用那么小的,因为会占用常用接口
