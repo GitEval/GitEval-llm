@@ -3,15 +3,12 @@ import json
 from collections import Counter, defaultdict
 from typing import List
 import re
-
+from .search import country_search
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
-
 import config.config as config
 from . import models
-from langchain.chains.llm import LLMChain
 from langchain.prompts import PromptTemplate
-
 from .models import Domain, DomainResponse
 
 # 定义技术领域列表
@@ -64,7 +61,7 @@ evaluation_template = """
 
 area_template = """
 请根据以下用户的 GitHub 信息对其可能的地区进行推测。
-
+向量搜索获取到的地区{areas}
 个人简介: {bio}
 公司信息: {company}
 自述地区: {location}
@@ -104,7 +101,7 @@ evaluation_prompt = PromptTemplate(
 )
 
 area_prompt = PromptTemplate(
-    input_variables=["bio", "company", "location", "follower", "following"],
+    input_variables=["areas","bio", "company", "location", "follower", "following"],
     template=area_template
 )
 
@@ -149,50 +146,43 @@ class Service:
 
     async def get_domain(self, req: models.DomainRequest) -> DomainResponse:
         tech_areas = []
-
-        # 创建一个任务列表
         tasks = []
 
         for repo in req.repos:
-            # 使用 asyncio.create_task 创建任务
             tasks.append(asyncio.create_task(self.fetch_domain_for_repo(repo)))
 
-        # 限制并发任务的数量
         for i in range(0, len(tasks), 5):
-            # 使用 asyncio.gather 批量执行最多 5 个任务
             results = await asyncio.gather(*tasks[i:i + 5])
             for result in results:
-                tech_areas.extend(result)  # 将每个仓库返回的技术领域加入列表
+                tech_areas.extend(result)
 
-        # 统计每个领域的出现次数
         area_counts = Counter(d.domain for d in tech_areas)
-
-        # 计算出现次数的阈值
         threshold = len(req.repos) / 5 * 2
-
-        # 过滤出出现次数满足条件的领域
         filtered_areas = [d for d in tech_areas if area_counts[d.domain] >= threshold]
 
-        # 创建一个字典来存储领域及其置信度
+        # 计算 filtered_areas 中的 commit 总和
+        total_commits = sum(repo.commit for repo in req.repos if repo.name in filtered_areas)
+
         domain_confidence = defaultdict(list)
-
-        # 按领域将置信度进行收集
         for area in filtered_areas:
-            if area.confidence >= 0.3:  # 只保留置信度大于等于0.3的部分
-                domain_confidence[area.domain].append(area.confidence)
+            if area.confidence >= 0.3:
+                # 计算 commit 占比并调整置信度
+                commit_ratio = area.commit / total_commits if total_commits > 0 else 0
+                adjusted_confidence = min(area.confidence * (1 + commit_ratio), 1)  # 限制置信度不超过1
+                domain_confidence[area.domain].append(adjusted_confidence)
 
-        # 计算每个领域的平均置信度
+        # 计算每个领域的平均调整置信度
         averaged_domains = [
             Domain(domain=domain, confidence=sum(confidences) / len(confidences))
             for domain, confidences in domain_confidence.items()
         ]
 
-        # 筛选出置信度大于等于0.6的领域，并按置信度从高到低排序
+        # 筛选和排序
         top_areas = sorted(
             (d for d in averaged_domains if d.confidence >= 0.6),
             key=lambda x: x.confidence,
             reverse=True
-        )[:3]  # 取前 3 个
+        )[:3]
 
         return DomainResponse(domains=top_areas)
 
@@ -239,9 +229,14 @@ class Service:
         return models.EvaluationResponse(evaluation=final_evaluation)
 
     async def get_area(self, req: models.AreaRequest) -> models.AreaResponse:
+        # 向量搜索获取可能的国家
+        query_text = f"个人简介: {req.bio}\n公司信息: {req.company}\n自述地区: {req.location}\n粉丝的自述地区分布: {req.follower_areas}\n关注的用户的自述地区分布: {req.following_areas}"
+        #
+        search_areas = country_search.search(query_text)
         try:
             # 运行 areaChain 并获取返回结果
             result = self.areaChain.invoke({
+                "areas": search_areas,
                 "bio": req.bio,
                 "company": req.company,
                 "location": req.location,

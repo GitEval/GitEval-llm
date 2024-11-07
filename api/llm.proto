@@ -2,13 +2,13 @@ syntax = "proto3";
 package llm;
 option go_package="../gen;llm";
 
-// Python的grpc_tools在1.43.0版本之后就不会显式生成结构体了。但是依旧能够使用，如果不爽的话可以降低版本
 
 // 定义 Repo 消息
 message Repo {
   string name = 1;
   string readme = 2;
   string language = 3;
+  int32 commit =4;
 }
 
 // 定义 DomainRequest 消息

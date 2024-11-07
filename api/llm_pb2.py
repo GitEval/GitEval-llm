@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z\n../gen;llm',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\tllm.proto\x12\x03llm\"6\n\x04Repo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06readme\x18\x02 \x01(\t\x12\x10\n\x08language\x18\x03 \x01(\t\"9\n\x10GetDomainRequest\x12\x18\n\x05repos\x18\x01 \x03(\x0b\x32\t.llm.Repo\x12\x0b\n\x03\x62io\x18\x02 \x01(\t\",\n\x06\x44omain\x12\x0e\n\x06\x64omain\x18\x01 \x01(\t\x12\x12\n\nconfidence\x18\x02 \x01(\x02\"1\n\x11GetDomainResponse\x12\x1c\n\x07\x64omains\x18\x01 \x03(\x0b\x32\x0b.llm.Domain\"\x8b\x01\n\x08RepoInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x18\n\x10stargazers_count\x18\x03 \x01(\x05\x12\x13\n\x0b\x66orks_count\x18\x04 \x01(\x05\x12\x12\n\ncreated_at\x18\x05 \x01(\t\x12\x19\n\x11subscribers_count\x18\x06 \x01(\x05\"p\n\tUserEvent\x12\x1b\n\x04repo\x18\x01 \x01(\x0b\x32\r.llm.RepoInfo\x12\x14\n\x0c\x63ommit_count\x18\x02 \x01(\x05\x12\x14\n\x0cissues_count\x18\x03 \x01(\x05\x12\x1a\n\x12pull_request_count\x18\x04 \x01(\x05\"\xb8\x01\n\x14GetEvaluationRequest\x12\x0b\n\x03\x62io\x18\x01 \x01(\t\x12\x11\n\tfollowers\x18\x02 \x01(\x05\x12\x11\n\tfollowing\x18\x03 \x01(\x05\x12\x1b\n\x13total_private_repos\x18\x04 \x01(\x05\x12\x1a\n\x12total_public_repos\x18\x05 \x01(\x05\x12#\n\x0buser_events\x18\x06 \x03(\x0b\x32\x0e.llm.UserEvent\x12\x0f\n\x07\x64omains\x18\x07 \x03(\t\"+\n\x15GetEvaluationResponse\x12\x12\n\nevaluation\x18\x01 \x01(\t\"q\n\x0eGetAreaRequest\x12\x0b\n\x03\x62io\x18\x01 \x01(\t\x12\x0f\n\x07\x63ompany\x18\x02 \x01(\t\x12\x10\n\x08location\x18\x03 \x01(\t\x12\x16\n\x0e\x66ollower_areas\x18\x04 \x03(\t\x12\x17\n\x0f\x66ollowing_areas\x18\x05 \x03(\t\"3\n\x0fGetAreaResponse\x12\x0c\n\x04\x61rea\x18\x01 \x01(\t\x12\x12\n\nconfidence\x18\x02 \x01(\x02\x32\xc6\x01\n\nLLMService\x12\x46\n\rGetEvaluation\x12\x19.llm.GetEvaluationRequest\x1a\x1a.llm.GetEvaluationResponse\x12\x34\n\x07GetArea\x12\x13.llm.GetAreaRequest\x1a\x14.llm.GetAreaResponse\x12:\n\tGetDomain\x12\x15.llm.GetDomainRequest\x1a\x16.llm.GetDomainResponseB\x0cZ\n../gen;llmb\x06proto3'
+  serialized_pb=b'\n\tllm.proto\x12\x03llm\"F\n\x04Repo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06readme\x18\x02 \x01(\t\x12\x10\n\x08language\x18\x03 \x01(\t\x12\x0e\n\x06\x63ommit\x18\x04 \x01(\x05\"9\n\x10GetDomainRequest\x12\x18\n\x05repos\x18\x01 \x03(\x0b\x32\t.llm.Repo\x12\x0b\n\x03\x62io\x18\x02 \x01(\t\",\n\x06\x44omain\x12\x0e\n\x06\x64omain\x18\x01 \x01(\t\x12\x12\n\nconfidence\x18\x02 \x01(\x02\"1\n\x11GetDomainResponse\x12\x1c\n\x07\x64omains\x18\x01 \x03(\x0b\x32\x0b.llm.Domain\"\x8b\x01\n\x08RepoInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x18\n\x10stargazers_count\x18\x03 \x01(\x05\x12\x13\n\x0b\x66orks_count\x18\x04 \x01(\x05\x12\x12\n\ncreated_at\x18\x05 \x01(\t\x12\x19\n\x11subscribers_count\x18\x06 \x01(\x05\"p\n\tUserEvent\x12\x1b\n\x04repo\x18\x01 \x01(\x0b\x32\r.llm.RepoInfo\x12\x14\n\x0c\x63ommit_count\x18\x02 \x01(\x05\x12\x14\n\x0cissues_count\x18\x03 \x01(\x05\x12\x1a\n\x12pull_request_count\x18\x04 \x01(\x05\"\xb8\x01\n\x14GetEvaluationRequest\x12\x0b\n\x03\x62io\x18\x01 \x01(\t\x12\x11\n\tfollowers\x18\x02 \x01(\x05\x12\x11\n\tfollowing\x18\x03 \x01(\x05\x12\x1b\n\x13total_private_repos\x18\x04 \x01(\x05\x12\x1a\n\x12total_public_repos\x18\x05 \x01(\x05\x12#\n\x0buser_events\x18\x06 \x03(\x0b\x32\x0e.llm.UserEvent\x12\x0f\n\x07\x64omains\x18\x07 \x03(\t\"+\n\x15GetEvaluationResponse\x12\x12\n\nevaluation\x18\x01 \x01(\t\"q\n\x0eGetAreaRequest\x12\x0b\n\x03\x62io\x18\x01 \x01(\t\x12\x0f\n\x07\x63ompany\x18\x02 \x01(\t\x12\x10\n\x08location\x18\x03 \x01(\t\x12\x16\n\x0e\x66ollower_areas\x18\x04 \x03(\t\x12\x17\n\x0f\x66ollowing_areas\x18\x05 \x03(\t\"3\n\x0fGetAreaResponse\x12\x0c\n\x04\x61rea\x18\x01 \x01(\t\x12\x12\n\nconfidence\x18\x02 \x01(\x02\x32\xc6\x01\n\nLLMService\x12\x46\n\rGetEvaluation\x12\x19.llm.GetEvaluationRequest\x1a\x1a.llm.GetEvaluationResponse\x12\x34\n\x07GetArea\x12\x13.llm.GetAreaRequest\x1a\x14.llm.GetAreaResponse\x12:\n\tGetDomain\x12\x15.llm.GetDomainRequest\x1a\x16.llm.GetDomainResponseB\x0cZ\n../gen;llmb\x06proto3'
 )
 
 
@@ -54,6 +54,13 @@ _REPO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='commit', full_name='llm.Repo.commit', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -67,7 +74,7 @@ _REPO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=18,
-  serialized_end=72,
+  serialized_end=88,
 )
 
 
@@ -105,8 +112,8 @@ _GETDOMAINREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=74,
-  serialized_end=131,
+  serialized_start=90,
+  serialized_end=147,
 )
 
 
@@ -144,8 +151,8 @@ _DOMAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=133,
-  serialized_end=177,
+  serialized_start=149,
+  serialized_end=193,
 )
 
 
@@ -176,8 +183,8 @@ _GETDOMAINRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=179,
-  serialized_end=228,
+  serialized_start=195,
+  serialized_end=244,
 )
 
 
@@ -243,8 +250,8 @@ _REPOINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=231,
-  serialized_end=370,
+  serialized_start=247,
+  serialized_end=386,
 )
 
 
@@ -296,8 +303,8 @@ _USEREVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=372,
-  serialized_end=484,
+  serialized_start=388,
+  serialized_end=500,
 )
 
 
@@ -370,8 +377,8 @@ _GETEVALUATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=487,
-  serialized_end=671,
+  serialized_start=503,
+  serialized_end=687,
 )
 
 
@@ -402,8 +409,8 @@ _GETEVALUATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=673,
-  serialized_end=716,
+  serialized_start=689,
+  serialized_end=732,
 )
 
 
@@ -462,8 +469,8 @@ _GETAREAREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=718,
-  serialized_end=831,
+  serialized_start=734,
+  serialized_end=847,
 )
 
 
@@ -501,8 +508,8 @@ _GETAREARESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=833,
-  serialized_end=884,
+  serialized_start=849,
+  serialized_end=900,
 )
 
 _GETDOMAINREQUEST.fields_by_name['repos'].message_type = _REPO
@@ -601,8 +608,8 @@ _LLMSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=887,
-  serialized_end=1085,
+  serialized_start=903,
+  serialized_end=1101,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetEvaluation',

@@ -6,6 +6,7 @@ class Repo(BaseModel):
     name: Optional[str]
     readme: Optional[str]
     language: Optional[str]
+    commit: Optional[int]
 
 
 class DomainRequest(BaseModel):

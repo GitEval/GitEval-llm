@@ -11,7 +11,8 @@ class LLMServiceServicer(llm_pb2_grpc.LLMServiceServicer):
         try:
             # 从 gRPC 请求中解析并构造内部的 DomainRequest 模型
             req = models.DomainRequest(
-                repos=[models.Repo(name=repo.name, readme=repo.readme, language=repo.language) for repo in
+                repos=[models.Repo(name=repo.name, readme=repo.readme, language=repo.language, commit=repo.commit) for
+                       repo in
                        request.repos],  # 解析 repos
                 bio=request.bio
             )
@@ -30,8 +31,6 @@ class LLMServiceServicer(llm_pb2_grpc.LLMServiceServicer):
             # 验证 user_events 的格式
             user_events = []
             for event in request.user_events:
-
-
                 # 确保每个事件的 repo 字段存在并符合 RepoInfo 模型
                 repo_info = {
                     "name": event.repo.name,
@@ -63,8 +62,6 @@ class LLMServiceServicer(llm_pb2_grpc.LLMServiceServicer):
                 domains=request.domains
             )
 
-
-
             # 异步调用服务层的 get_evaluation 方法，并使用 await 等待其完成
             response = await self._service.get_evaluation(req)
 
@@ -84,6 +81,7 @@ class LLMServiceServicer(llm_pb2_grpc.LLMServiceServicer):
             context.set_details(f"Error in GetEvaluation: {str(e)}")
             context.set_code(grpc.StatusCode.INTERNAL)
             return llm_pb2.GetEvaluationResponse()  # 返回空响应，或者设置具体错误字段
+
     async def GetArea(self, request, context):
         try:
             # 解析请求并构造内部的 AreaRequest

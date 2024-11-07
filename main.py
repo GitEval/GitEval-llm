@@ -1,5 +1,4 @@
 import grpc
-from concurrent import futures
 from api import llm_pb2_grpc
 from server.handlers import LLMServiceServicer
 from config import config
